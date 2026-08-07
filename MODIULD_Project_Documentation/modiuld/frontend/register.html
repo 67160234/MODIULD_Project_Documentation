@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — MODIULD</title>
+  <meta name="description" content="สมัครสมาชิก MODIULD เพื่อเริ่มสร้าง Workflow ของคุณ">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animated"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a href="index.html">
+        <img src="assets/logo.png" alt="MODIULD" class="navbar-logo" onerror="this.style.display='none'">
+      </a>
+    </div>
+    <div class="navbar-links">
+      <a href="login.html" id="nav-signin">Sign in</a>
+      <a href="register.html" class="active" id="nav-register">Register</a>
+    </div>
+  </nav>
+
+  <!-- Register Form -->
+  <main class="page-center">
+    <div class="auth-card slide-up" id="auth-card">
+      <!-- Logo -->
+      <div class="auth-card-logo">
+        <img src="assets/logo.png" alt="MODIULD" class="auth-card-logo-img" onerror="this.outerHTML='<div style=\'font-size:28px;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,#4F8EF7,#9C4FE0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;\'>MODIULD</div>'">
+      </div>
+
+      <!-- Page Label -->
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;font-weight:500;">Home page</p>
+
+      <!-- Error/Success Message -->
+      <div class="form-message" id="form-message"></div>
+
+      <!-- Form -->
+      <form id="register-form" novalidate>
+        <div class="form-group">
+          <input
+            type="text"
+            id="username"
+            name="username"
+            class="form-input"
+            placeholder="Username (ภาษาอังกฤษ, ตัวเลข, _)"
+            autocomplete="username"
+            required
+          >
+          <small id="username-hint" style="font-size:12px;color:var(--text-muted);margin-top:4px;display:none;"></small>
+        </div>
+
+        <div class="form-group">
+          <input
+            type="text"
+            id="full_name"
+            name="full_name"
+            class="form-input"
+            placeholder="ชื่อ-นามสกุล (ไม่บังคับ)"
+            autocomplete="name"
+          >
+        </div>
+
+        <div class="form-group">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="กรอกอีเมล"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="รหัสผ่าน (min 8 ตัว, ตัวพิมพ์ใหญ่ 1 ตัว, ตัวเลข 1 ตัว)"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <input
+            type="password"
+            id="confirm_password"
+            name="confirm_password"
+            class="form-input"
+            placeholder="กรอกรหัสผ่านอีกครั้ง"
+            autocomplete="new-password"
+            required
+          >
+        </div>
+
+        <!-- Google Sign In (Mock) -->
+        <button type="button" class="btn btn-google" id="btn-google">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" onerror="this.outerHTML='G'">
+          Sign in with Google
+        </button>
+
+        <!-- Register Button -->
+        <button type="submit" class="btn btn-primary" id="btn-submit">
+          Register
+        </button>
+      </form>
+
+      <!-- Footer Links -->
+      <div class="auth-links">
+        <div style="font-size:14px;color:var(--text-muted);">
+          มีบัญชีอยู่แล้ว? <a href="login.html" class="btn-link" id="link-signin">Sign in</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Language Badge -->
+  <div class="lang-badge" id="lang-toggle">EN</div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const API_BASE = 'http://localhost/api';
+
+    // Redirect if already logged in
+    if (localStorage.getItem('modiuld_token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Username availability check (debounced)
+    let usernameTimer;
+    document.getElementById('username').addEventListener('input', function () {
+      const val = this.value.trim();
+      const hint = document.getElementById('username-hint');
+
+      clearTimeout(usernameTimer);
+      if (!val || val.length < 3) {
+        hint.style.display = 'none';
+        return;
+      }
+
+      usernameTimer = setTimeout(async () => {
+        try {
+          const res = await fetch(`${API_BASE}/check-username/${encodeURIComponent(val)}`);
+          const data = await res.json();
+          hint.style.display = 'block';
+          if (data.available) {
+            hint.style.color = 'var(--cyan)';
+            hint.textContent = '✓ Username ว่าง';
+          } else {
+            hint.style.color = '#ff6b9d';
+            hint.textContent = '✗ Username นี้ถูกใช้แล้ว';
+          }
+        } catch (err) {
+          hint.style.display = 'none';
+        }
+      }, 500);
+    });
+
+    // Register Form Submit
+    document.getElementById('register-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+
+      const username        = document.getElementById('username').value.trim();
+      const full_name       = document.getElementById('full_name').value.trim();
+      const email           = document.getElementById('email').value.trim();
+      const password        = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm_password').value;
+
+      // Client validation
+      if (!username || !email || !password || !confirmPassword) {
+        showMessage('กรุณากรอกข้อมูลที่จำเป็นให้ครบ', 'error');
+        return;
+      }
+      if (!/^[a-zA-Z0-9_]{3,50}$/.test(username)) {
+        showMessage('Username ต้องมี 3-50 ตัวอักษร (ภาษาอังกฤษ, ตัวเลข, _ เท่านั้น)', 'error');
+        return;
+      }
+      if (password !== confirmPassword) {
+        showMessage('รหัสผ่านไม่ตรงกัน', 'error');
+        document.getElementById('confirm_password').classList.add('error');
+        return;
+      }
+      if (password.length < 8 || !/[A-Z]/.test(password) || !/[0-9]/.test(password)) {
+        showMessage('รหัสผ่านต้องมีอย่างน้อย 8 ตัว ตัวพิมพ์ใหญ่ 1 ตัว และตัวเลข 1 ตัว', 'error');
+        return;
+      }
+
+      // Loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> กำลังสมัคร...';
+      hideMessage();
+      document.getElementById('confirm_password').classList.remove('error');
+
+      try {
+        const res = await fetch(`${API_BASE}/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, email, password, full_name: full_name || undefined }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          showMessage('สมัครสมาชิกสำเร็จ! กำลังนำไปหน้าเข้าสู่ระบบ...', 'success');
+          setTimeout(() => { window.location.href = 'login.html'; }, 1500);
+        } else {
+          showMessage(data.message || 'เกิดข้อผิดพลาด กรุณาลองอีกครั้ง', 'error');
+          resetBtn();
+        }
+      } catch (err) {
+        showMessage('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองอีกครั้ง', 'error');
+        resetBtn();
+      }
+
+      function resetBtn() {
+        btn.disabled = false;
+        btn.innerHTML = 'Register';
+      }
+    });
+
+    // Google button (mock)
+    document.getElementById('btn-google').addEventListener('click', function () {
+      showToast('Google Login ยังไม่เปิดให้บริการ (Mock)', 'error');
+    });
+
+    // Language toggle
+    document.getElementById('lang-toggle').addEventListener('click', function () {
+      this.textContent = this.textContent === 'EN' ? 'TH' : 'EN';
+    });
+
+    function showMessage(msg, type) {
+      const el = document.getElementById('form-message');
+      el.textContent = msg;
+      el.className = 'form-message ' + type;
+    }
+    function hideMessage() {
+      const el = document.getElementById('form-message');
+      el.className = 'form-message';
+    }
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+  </script>
+</body>
+</html>

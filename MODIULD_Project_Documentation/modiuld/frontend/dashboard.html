@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Loadout — MODIULD</title>
+  <meta name="description" content="จัดการ Loadout ของคุณใน MODIULD">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Sidebar account panel */
+    .sidebar-account-panel {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    .sidebar-account-panel.open { display: block; }
+    .sidebar-loadout-list {
+      list-style: disc;
+      padding-left: 18px;
+      margin-bottom: 16px;
+    }
+    .sidebar-loadout-list li {
+      font-size: 14px;
+      color: var(--text-secondary);
+      padding: 4px 0;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .sidebar-loadout-list li:hover { color: var(--text-primary); }
+
+    /* Placeholder image for loadout cards */
+    .loadout-card-placeholder {
+      width: 75%; height: 55%;
+      background: rgba(255,255,255,0.06);
+      border-radius: var(--radius-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: rgba(255,255,255,0.2);
+      font-size: 40px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animated"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a href="index.html">
+        <img src="assets/logo.png" alt="MODIULD" class="navbar-logo"
+          onerror="this.outerHTML='<span style=\'font-size:18px;font-weight:800;letter-spacing:2px;background:linear-gradient(135deg,#4F8EF7,#9C4FE0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;\'>MODIULD</span>'">
+      </a>
+    </div>
+    <div class="navbar-links">
+      <!-- User avatar -->
+      <div class="user-avatar" id="user-avatar-btn" title="Account">👤</div>
+    </div>
+  </nav>
+
+  <!-- Layout -->
+  <div class="layout">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <!-- Account dropdown panel -->
+      <div class="sidebar-account-panel" id="account-panel">
+        <div class="sidebar-account-header">
+          <h4>Account</h4>
+          <button class="sidebar-close-btn" id="close-account-panel">✕</button>
+        </div>
+        <ul class="sidebar-menu" style="margin-bottom:12px;">
+          <li><a href="#" id="btn-switch-account">• Switch account</a></li>
+          <li><a href="#" id="btn-logout">• Logout</a></li>
+        </ul>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:8px;font-weight:600;">Setting</div>
+        <div class="sidebar-toggle-row">
+          <span>Color Mode</span>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="sidebar-toggle-row">
+          <span>Light Mode</span>
+          <div class="toggle-switch"></div>
+        </div>
+        <div class="sidebar-toggle-row">
+          <span>Dark Mode</span>
+          <div class="toggle-switch"></div>
+        </div>
+      </div>
+
+      <!-- Menu -->
+      <div class="sidebar-section-title">Menu</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html" class="active">• Your Loadout</a></li>
+      </ul>
+
+      <!-- Loadouts -->
+      <div class="sidebar-section-title">Loadouts</div>
+      <ul class="sidebar-loadout-list" id="sidebar-loadout-list">
+        <!-- filled by JS -->
+      </ul>
+
+      <button class="sidebar-btn-create" id="sidebar-create-btn">+ Create New Loadout</button>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content fade-in">
+      <h1 class="page-title">Your Loadout</h1>
+      <p class="page-subtitle" id="page-subtitle">Select a loadout to open a workspace or create a new one.</p>
+
+      <!-- Loadout Grid -->
+      <div class="loadout-grid" id="loadout-grid">
+        <!-- Filled by JS -->
+      </div>
+    </main>
+  </div>
+
+  <!-- Language Badge -->
+  <div class="lang-badge" id="lang-toggle">EN</div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Create Loadout Modal (simple inline) -->
+  <div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(8px);z-index:500;align-items:center;justify-content:center;">
+    <div style="background:var(--bg-mid);border:1px solid var(--border-card);border-radius:var(--radius-xl);padding:40px;width:400px;max-width:90vw;position:relative;">
+      <h2 style="font-size:22px;font-weight:700;margin-bottom:8px;">Create New Loadout</h2>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:24px;">ตั้งชื่อ Loadout ของคุณ</p>
+      <input type="text" id="new-loadout-name" class="form-input" placeholder="Loadout Name" style="margin-bottom:16px;">
+      <div style="display:flex;gap:12px;">
+        <button class="btn btn-primary" id="btn-create-confirm" style="flex:1;">Create</button>
+        <button class="btn btn-outline" id="btn-modal-cancel" style="flex:1;">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ── Mock Data ──
+    const MOCK_LOADOUTS = [
+      { id: 1, name: 'Loadout Untitled' },
+      { id: 2, name: 'ข้อมูลคนไข้' },
+      { id: 3, name: 'ข้อมูลสินค้าในคลัง' },
+      { id: 4, name: 'บันทึกการเติบโตของต้นยาง' },
+    ];
+
+    let loadouts = [...MOCK_LOADOUTS];
+    const user = JSON.parse(localStorage.getItem('modiuld_user') || 'null');
+    const token = localStorage.getItem('modiuld_token');
+    const isGuest = localStorage.getItem('modiuld_guest');
+
+    // Redirect if not logged in and not guest
+    if (!token && !isGuest) {
+      window.location.href = 'login.html';
+    }
+
+    // Set subtitle
+    if (user) {
+      document.getElementById('page-subtitle').textContent =
+        `ยินดีต้อนรับ, ${user.full_name || user.username}! เลือก loadout เพื่อเปิดหน้าทำงาน หรือสร้างใหม่`;
+    }
+
+    // Render loadouts
+    function renderLoadouts() {
+      const grid = document.getElementById('loadout-grid');
+      const sidebarList = document.getElementById('sidebar-loadout-list');
+
+      grid.innerHTML = '';
+      sidebarList.innerHTML = '';
+
+      // Render existing loadout cards
+      loadouts.forEach(lo => {
+        // Grid card
+        const card = document.createElement('div');
+        card.className = 'loadout-card';
+        card.innerHTML = `
+          <div style="font-size:13px;font-weight:600;color:var(--text-secondary);position:absolute;top:14px;left:14px;right:14px;text-align:left;">${lo.name}</div>
+          <div class="loadout-card-placeholder">🏔</div>
+          <div class="loadout-card-actions">
+            <button onclick="viewLoadout(${lo.id})">View</button>
+            <button class="btn-edit" onclick="editLoadout(${lo.id})">Edit</button>
+          </div>
+        `;
+        grid.appendChild(card);
+
+        // Sidebar list
+        const li = document.createElement('li');
+        li.textContent = lo.name;
+        li.onclick = () => showToast(`เปิด Loadout: ${lo.name} (Mock)`, 'success');
+        sidebarList.appendChild(li);
+      });
+
+      // Add "Create New" card
+      const addCard = document.createElement('div');
+      addCard.className = 'loadout-card loadout-card-add';
+      addCard.innerHTML = `
+        <div style="font-size:13px;font-weight:600;color:var(--text-muted);position:absolute;top:14px;left:14px;">Create New Loadout</div>
+        <div class="loadout-card-icon">✚</div>
+      `;
+      addCard.addEventListener('click', openModal);
+      grid.appendChild(addCard);
+    }
+
+    renderLoadouts();
+
+    // ── Account Panel ──
+    document.getElementById('user-avatar-btn').addEventListener('click', function () {
+      const panel = document.getElementById('account-panel');
+      panel.classList.toggle('open');
+    });
+    document.getElementById('close-account-panel').addEventListener('click', function () {
+      document.getElementById('account-panel').classList.remove('open');
+    });
+
+    // Logout
+    document.getElementById('btn-logout').addEventListener('click', async function (e) {
+      e.preventDefault();
+      const t = localStorage.getItem('modiuld_token');
+      if (t) {
+        try {
+          await fetch('http://localhost/api/logout', {
+            method: 'POST',
+            headers: { 'Authorization': 'Bearer ' + t }
+          });
+        } catch (_) {}
+      }
+      localStorage.removeItem('modiuld_token');
+      localStorage.removeItem('modiuld_user');
+      localStorage.removeItem('modiuld_guest');
+      window.location.href = 'index.html';
+    });
+
+    // Switch account (mock)
+    document.getElementById('btn-switch-account').addEventListener('click', function (e) {
+      e.preventDefault();
+      showToast('Switch Account (Mock)', 'error');
+    });
+
+    // ── Create Modal ──
+    function openModal() {
+      const overlay = document.getElementById('modal-overlay');
+      overlay.style.display = 'flex';
+      document.getElementById('new-loadout-name').value = '';
+      document.getElementById('new-loadout-name').focus();
+    }
+    function closeModal() {
+      document.getElementById('modal-overlay').style.display = 'none';
+    }
+
+    document.getElementById('sidebar-create-btn').addEventListener('click', openModal);
+    document.getElementById('btn-modal-cancel').addEventListener('click', closeModal);
+    document.getElementById('modal-overlay').addEventListener('click', function (e) {
+      if (e.target === this) closeModal();
+    });
+
+    document.getElementById('btn-create-confirm').addEventListener('click', function () {
+      const name = document.getElementById('new-loadout-name').value.trim();
+      if (!name) {
+        showToast('กรุณาใส่ชื่อ Loadout', 'error');
+        return;
+      }
+      loadouts.unshift({ id: Date.now(), name });
+      renderLoadouts();
+      closeModal();
+      showToast(`สร้าง Loadout "${name}" สำเร็จ (Mock)`, 'success');
+    });
+
+    // ── Mock actions ──
+    function viewLoadout(id) { showToast(`กำลังเปิด Loadout #${id} (Mock)`, 'success'); }
+    function editLoadout(id) { showToast(`แก้ไข Loadout #${id} (Mock)`, 'success'); }
+
+    // Language toggle
+    document.getElementById('lang-toggle').addEventListener('click', function () {
+      this.textContent = this.textContent === 'EN' ? 'TH' : 'EN';
+    });
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => { t.className = 'toast'; }, 3000);
+    }
+  </script>
+</body>
+</html>

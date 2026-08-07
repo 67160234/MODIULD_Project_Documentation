@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MODIULD — สร้าง Workflow ของคุณ</title>
+  <meta name="description" content="MODIULD แพลตฟอร์มสำหรับสร้าง Workflow โดยไม่ต้องใช้ Excel สร้าง Workspace, Loadout และเลือก Module เพื่อประกอบเป็นระบบงานของตนเอง">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animated"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <img src="assets/logo.png" alt="MODIULD Logo" class="navbar-logo" onerror="this.style.display='none'">
+    </div>
+    <div class="navbar-links">
+      <a href="login.html" class="active" id="nav-signin">Sign in</a>
+      <a href="register.html" id="nav-register">Register</a>
+    </div>
+  </nav>
+
+  <!-- Landing Hero -->
+  <main class="landing-center fade-in">
+    <!-- Hero Logo with Blob -->
+    <div class="hero-logo-wrap">
+      <div class="hero-logo-blob">
+        <span class="hero-logo-text">MODIULD</span>
+      </div>
+    </div>
+
+    <!-- CTA Buttons -->
+    <div class="landing-btn-row slide-up">
+      <a href="login.html" class="btn btn-outline" id="btn-signin">Sign In</a>
+      <a href="login.html?guest=1" class="btn btn-ghost" id="btn-guest">Guest</a>
+    </div>
+  </main>
+
+  <!-- Language Badge -->
+  <div class="lang-badge" id="lang-toggle">EN</div>
+
+  <script>
+    // Check if already logged in
+    const token = localStorage.getItem('modiuld_token');
+    if (token) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Language toggle (mock)
+    document.getElementById('lang-toggle').addEventListener('click', function () {
+      this.textContent = this.textContent === 'EN' ? 'TH' : 'EN';
+    });
+
+    // Guest mode
+    document.getElementById('btn-guest').addEventListener('click', function (e) {
+      e.preventDefault();
+      localStorage.setItem('modiuld_guest', '1');
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>

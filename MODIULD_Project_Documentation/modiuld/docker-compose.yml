@@ -1,0 +1,75 @@
+version: '3.8'
+
+services:
+  nginx:
+    image: nginx:alpine
+    container_name: modiuld_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./frontend:/var/www/html/frontend
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - php
+    networks:
+      - modiuld_net
+
+  php:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: modiuld_php
+    volumes:
+      - ./backend:/var/www/html/backend
+      - php_vendor:/var/www/html/backend/vendor
+    depends_on:
+      - mysql
+    networks:
+      - modiuld_net
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=modiuld_db
+      - DB_USER=modiuld_user
+      - DB_PASS=modiuld_pass
+      - JWT_SECRET=modiuld_super_secret_jwt_key_2024
+      - JWT_EXPIRE=86400
+
+  mysql:
+    image: mysql:8.0
+    container_name: modiuld_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: modiuld_db
+      MYSQL_USER: modiuld_user
+      MYSQL_PASSWORD: modiuld_pass
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - modiuld_net
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: modiuld_phpmyadmin
+    ports:
+      - "8080:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: modiuld_user
+      PMA_PASSWORD: modiuld_pass
+    depends_on:
+      - mysql
+    networks:
+      - modiuld_net
+
+volumes:
+  mysql_data:
+  php_vendor:
+
+networks:
+  modiuld_net:
+    driver: bridge

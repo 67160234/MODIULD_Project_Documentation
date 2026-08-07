@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In — MODIULD</title>
+  <meta name="description" content="เข้าสู่ระบบ MODIULD เพื่อสร้างและจัดการ Workflow ของคุณ">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Animated Background -->
+  <div class="bg-animated"></div>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-brand">
+      <a href="index.html">
+        <img src="assets/logo.png" alt="MODIULD" class="navbar-logo" onerror="this.style.display='none'">
+      </a>
+    </div>
+    <div class="navbar-links">
+      <a href="login.html" class="active" id="nav-signin">Sign in</a>
+      <a href="register.html" id="nav-register">Register</a>
+    </div>
+  </nav>
+
+  <!-- Login Form -->
+  <main class="page-center">
+    <div class="auth-card slide-up" id="auth-card">
+      <!-- Logo -->
+      <div class="auth-card-logo">
+        <img src="assets/logo.png" alt="MODIULD" class="auth-card-logo-img" onerror="this.outerHTML='<div style=\'font-size:28px;font-weight:800;letter-spacing:3px;background:linear-gradient(135deg,#4F8EF7,#9C4FE0);-webkit-background-clip:text;-webkit-text-fill-color:transparent;\'>MODIULD</div>'">
+      </div>
+
+      <!-- Page Label (from mockup) -->
+      <p style="font-size:12px;color:var(--text-muted);margin-bottom:20px;font-weight:500;">Home page</p>
+
+      <!-- Error/Success Message -->
+      <div class="form-message" id="form-message"></div>
+
+      <!-- Form -->
+      <form id="login-form" novalidate>
+        <div class="form-group">
+          <input
+            type="email"
+            id="email"
+            name="email"
+            class="form-input"
+            placeholder="กรอกอีเมล"
+            autocomplete="email"
+            required
+          >
+        </div>
+
+        <div class="form-group">
+          <input
+            type="password"
+            id="password"
+            name="password"
+            class="form-input"
+            placeholder="รหัสผ่าน"
+            autocomplete="current-password"
+            required
+          >
+        </div>
+
+        <!-- Google Sign In (Mock) -->
+        <button type="button" class="btn btn-google" id="btn-google" title="Google Login is not available yet">
+          <img src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google" onerror="this.outerHTML='G'">
+          Sign in with Google
+        </button>
+
+        <!-- Sign In Button -->
+        <button type="submit" class="btn btn-primary" id="btn-submit">
+          Sign in
+        </button>
+      </form>
+
+      <!-- Footer Links -->
+      <div class="auth-links">
+        <div>
+          <a href="register.html" class="btn-link" id="link-register">Register</a>
+        </div>
+        <div>
+          <a href="#" class="btn-link" id="link-forgot" style="color:var(--text-muted);font-weight:500;">Forget Password</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Language Badge -->
+  <div class="lang-badge" id="lang-toggle">EN</div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const API_BASE = 'http://localhost/api';
+
+    // Redirect if already logged in
+    if (localStorage.getItem('modiuld_token')) {
+      window.location.href = 'dashboard.html';
+    }
+
+    // Login Form Submit
+    document.getElementById('login-form').addEventListener('submit', async function (e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      const msgEl = document.getElementById('form-message');
+
+      const email    = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      // Client-side validation
+      if (!email || !password) {
+        showMessage('กรุณากรอกอีเมลและรหัสผ่าน', 'error');
+        return;
+      }
+
+      // Loading state
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner"></span> กำลังเข้าสู่ระบบ...';
+      hideMessage();
+
+      try {
+        const res = await fetch(`${API_BASE}/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password }),
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+          // Save token & user info
+          localStorage.setItem('modiuld_token', data.data.token);
+          localStorage.setItem('modiuld_user', JSON.stringify(data.data.user));
+
+          showMessage('เข้าสู่ระบบสำเร็จ! กำลังนำไปยังหน้าหลัก...', 'success');
+          setTimeout(() => { window.location.href = 'dashboard.html'; }, 1000);
+        } else {
+          showMessage(data.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง', 'error');
+          resetBtn();
+        }
+      } catch (err) {
+        showMessage('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองอีกครั้ง', 'error');
+        resetBtn();
+      }
+
+      function resetBtn() {
+        btn.disabled = false;
+        btn.innerHTML = 'Sign in';
+      }
+    });
+
+    // Google button (mock)
+    document.getElementById('btn-google').addEventListener('click', function () {
+      showToast('Google Login ยังไม่เปิดให้บริการ (Mock)', 'error');
+    });
+
+    // Forgot password (mock)
+    document.getElementById('link-forgot').addEventListener('click', function (e) {
+      e.preventDefault();
+      showToast('ฟังก์ชันลืมรหัสผ่านยังไม่เปิดให้บริการ (Mock)', 'error');
+    });
+
+    // Language toggle (mock)
+    document.getElementById('lang-toggle').addEventListener('click', function () {
+      this.textContent = this.textContent === 'EN' ? 'TH' : 'EN';
+    });
+
+    function showMessage(msg, type) {
+      const el = document.getElementById('form-message');
+      el.textContent = msg;
+      el.className = 'form-message ' + type;
+    }
+    function hideMessage() {
+      const el = document.getElementById('form-message');
+      el.className = 'form-message';
+    }
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = 'toast show ' + type;
+      setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+  </script>
+</body>
+</html>
