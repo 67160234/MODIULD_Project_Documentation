@@ -16,11 +16,11 @@ docker-compose up -d --build
 ```
 ### ต้องใช้ Linux containers
 
-1.ไปที่มุมขวาล่างของหน้าจอ (System Tray)
-2.คลิกขวาที่ไอคอน Docker (รูปปลาวาฬ)
-3.คลิกเลือก Switch to Linux containers...
-4.จะมีหน้าต่างป๊อปอัปขึ้นมาให้ยืนยัน ให้กด Switch
-5.รอให้ Docker รีสตาร์ทสักครู่ แล้วลองรันคำสั่ง Docker ใหม่อีกครั้ง
+-1.ไปที่มุมขวาล่างของหน้าจอ (System Tray)
+-2.คลิกขวาที่ไอคอน Docker (รูปปลาวาฬ)
+-3.คลิกเลือก Switch to Linux containers...
+-4.จะมีหน้าต่างป๊อปอัปขึ้นมาให้ยืนยัน ให้กด Switch
+-5.รอให้ Docker รีสตาร์ทสักครู่ แล้วลองรันคำสั่ง Docker ใหม่อีกครั้ง
 
 ### Access
 | Service       | URL                        |
