@@ -1,0 +1,10 @@
+time="2026-09-19T13:33:24+07:00" level=warning msg="C:\\Users\\Lenovo\\Downloads\\MODIULD_Project_Documentation\\modiuld\\docker-compose.yml: the attribute `version` is obsolete, it will be ignored, please remove it to avoid potential confusion"
+ Image modiuld-php Building 
+ Image modiuld-php Built 
+time="2026-09-19T13:47:33+07:00" level=warning msg="Found orphan containers (modiuld_mysql) for this project. If you removed or renamed this service in your compose file, you can run this command with the --remove-orphans flag to clean it up."
+ Container modiuld-nginx-1 Running 
+ Container modiuld-db-1 Running 
+ Container modiuld-php-1 Recreate 
+ Container modiuld-phpmyadmin-1 Recreate 
+ Container modiuld-phpmyadmin-1 Error response from daemon: Conflict. The container name "/09495e4e1302_modiuld-phpmyadmin-1" is already in use by container "32439d26ecbb42e51dde8ee586ffd8483b18727fa21a1da27393d7220eb4c307". You have to remove (or rename) that container to be able to reuse that name. 
+Error response from daemon: Conflict. The container name "/09495e4e1302_modiuld-phpmyadmin-1" is already in use by container "32439d26ecbb42e51dde8ee586ffd8483b18727fa21a1da27393d7220eb4c307". You have to remove (or rename) that container to be able to reuse that name.

@@ -1,0 +1,96 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Room Booking — MODIULD</title>
+<link rel="icon" href="/frontend/assets/icon1.png">
+<link rel="stylesheet" href="/frontend/css/style.css?v=3">
+<script src="/frontend/js/theme.js?v=3" defer></script>
+<script src="/frontend/js/auth.js?v=3" defer></script>
+<script src="/frontend/js/version.js?v=3" defer></script>
+
+</head>
+<body class="module-body">
+<div class="module-page">
+  <div class="module-header">
+    <button class="btn-back" onclick="history.back()">&#8592; Back to Workspace</button>
+    <h1 class="module-page-title">Room Booking</h1>
+  </div>
+  <div id="alert-area" class="alert hidden"></div>
+  
+  <div class="module-layout">
+    <div class="module-col">
+      <h3 style="margin-bottom:16px">Create Booking</h3>
+      <form id="form-booking" onsubmit="addBooking(event)">
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Room</label>
+          <select id="b-room" class="form-control" required>
+            <option value="Meeting Room A">Meeting Room A (10)</option>
+            <option value="Meeting Room B">Meeting Room B (6)</option>
+            <option value="Conference Hall">Conference Hall (50)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Title</label>
+          <input type="text" id="b-title" class="form-control" required placeholder="e.g. Weekly Sync">
+        </div>
+        <div style="display:flex;gap:12px">
+          <div class="form-group" style="flex:1">
+            <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Start Time</label>
+            <input type="time" id="b-start" class="form-control" required>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">End Time</label>
+            <input type="time" id="b-end" class="form-control" required>
+          </div>
+        </div>
+        <button type="submit" class="btn-primary">Book Room</button>
+      </form>
+    </div>
+    
+    <div class="module-col" style="flex:2">
+      <h3 style="margin-bottom:16px">Today's Bookings</h3>
+      <table class="data-table" id="table-bookings">
+        <thead><tr><th>Room</th><th>Title</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody>
+          <!-- dynamic -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+let bookings = [
+  { room: 'Meeting Room A', title: 'Marketing Sync', time: '10:00 - 11:30', status: 'confirmed' }
+];
+function render() {
+  const tbody = document.querySelector('#table-bookings tbody');
+  if(!bookings.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">No bookings yet.</td></tr>'; return; }
+  tbody.innerHTML = bookings.map(b => `<tr>
+    <td style="font-weight:600">${b.room}</td>
+    <td>${b.title}</td>
+    <td>${b.time}</td>
+    <td><span class="badge ${b.status==='confirmed'?'badge-green':'badge-yellow'}">${b.status}</span></td>
+  </tr>`).join('');
+}
+function addBooking(e) {
+  e.preventDefault();
+  const room = document.getElementById('b-room').value;
+  const title = document.getElementById('b-title').value;
+  const start = document.getElementById('b-start').value;
+  const end = document.getElementById('b-end').value;
+  bookings.push({ room, title, time: `${start} - ${end}`, status: 'confirmed' });
+  e.target.reset();
+  render();
+  const alert = document.getElementById('alert-area');
+  alert.textContent = 'Room booked successfully!';
+  alert.className = 'alert alert-success';
+  setTimeout(()=>alert.classList.add('hidden'),3000);
+}
+render();
+</script>
+<div id="version-badge" class="version-badge"></div>
+</body>
+</html>
+
+

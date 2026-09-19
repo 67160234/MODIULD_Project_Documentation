@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register — MODIULD</title>
+<meta name="description" content="Create your MODIULD account.">
+<link rel="icon" href="/frontend/assets/icon1.png">
+<link rel="stylesheet" href="/frontend/css/style.css?v=3">
+<script src="/frontend/js/auth.js?v=3" defer></script>
+<script src="/frontend/js/version.js?v=3" defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-body">
+<nav class="navbar">
+  <div class="navbar-logo"><img src="/frontend/assets/icon1.png" alt="MODIULD"></div>
+  <ul class="navbar-nav">
+    <li><a href="/login.html">Sign in</a></li>
+    <li><a href="/register.html">Register</a></li>
+  </ul>
+</nav>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="/frontend/assets/Moduild_logo.png" alt="MODIULD">
+    </div>
+    <div id="reg-alert" class="alert hidden"></div>
+    <form id="register-form" novalidate>
+      <div class="form-group">
+        <input type="text" id="reg-username" class="form-control" placeholder="กรอก Username (ภาษาอังกฤษ/ตัวเลข)" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <input type="email" id="reg-email" class="form-control" placeholder="กรอกอีเมล" autocomplete="email" required>
+      </div>
+      <div class="form-group">
+        <input type="password" id="reg-password" class="form-control" placeholder="รหัสผ่าน" autocomplete="new-password" required>
+        <span class="password-toggle" onclick="togglePass('reg-password', this)">SHOW</span>
+      </div>
+      <div class="form-group">
+        <input type="password" id="reg-confirm" class="form-control" placeholder="กรอกรหัสผ่านอีกครั้ง" autocomplete="new-password" required>
+        <span class="password-toggle" onclick="togglePass('reg-confirm', this)">SHOW</span>
+      </div>
+      <div id="google-button" style="display:flex;justify-content:center;margin:14px 0"></div>
+      <div id="google-username-section" class="hidden">
+        <div class="form-group"><input type="text" id="google-username" class="form-control" placeholder="Username (3-20: letters, numbers, _)" autocomplete="username"></div>
+        <button type="button" class="btn-primary" id="btn-google-complete">Continue</button>
+      </div>
+      <button type="submit" class="btn-primary" id="btn-register">Register</button>
+    </form>
+    <div class="auth-links">
+      <a href="/login.html" id="link-signin">Sign in</a>
+    </div>
+  </div>
+</div>
+<script>
+function togglePass(id, btn) {
+  const el = document.getElementById(id);
+  if(el.type === 'password') { el.type = 'text'; btn.textContent = 'HIDE'; }
+  else { el.type = 'password'; btn.textContent = 'SHOW'; }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  Auth.redirectIfLoggedIn();
+  document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alert = document.getElementById('reg-alert');
+    const username = document.getElementById('reg-username').value.trim();
+    const email   = document.getElementById('reg-email').value.trim();
+    const pass    = document.getElementById('reg-password').value;
+    const confirm = document.getElementById('reg-confirm').value;
+    const btn     = document.getElementById('btn-register');
+    btn.disabled = true; btn.textContent = 'Creating account...';
+    const r = await Auth.register(email, username, pass, confirm, '');
+    btn.disabled = false; btn.textContent = 'Register';
+    if (r.ok) { showAlert(alert, 'Account created! Redirecting...', 'success'); setTimeout(() => window.location.href = '/dashboard.html', 1200); }
+    else { showAlert(alert, r.data.error || 'Registration failed.'); }
+  });
+  let googleSignupToken = null;
+  const googleResult = (r) => {
+    if (r.ok && r.data?.token) { window.location.href = '/dashboard.html'; return; }
+    if (r.ok && r.data?.needs_username) {
+      googleSignupToken = r.data.signup_token;
+      document.getElementById('google-username-section').classList.remove('hidden');
+      document.getElementById('google-button').classList.add('hidden');
+      document.querySelectorAll('#register-form > .form-group').forEach((el) => el.classList.add('hidden'));
+      document.getElementById('btn-register').classList.add('hidden');
+      showAlert(document.getElementById('reg-alert'), 'ใช้ ' + r.data.email + ' แล้ว กรุณาตั้ง Username เพื่อดำเนินการต่อ', 'success'); return;
+    }
+    showAlert(document.getElementById('reg-alert'), r.data?.error || r.error || 'Google Sign-In failed.');
+  };
+  Auth.initGoogle('google-button', googleResult);
+  document.getElementById('btn-google-complete').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-google-complete'); btn.disabled = true;
+    const r = await Auth.completeGoogleSignup(googleSignupToken, document.getElementById('google-username').value.trim());
+    btn.disabled = false; googleResult(r);
+  });
+});
+</script>
+<div id="version-badge" class="version-badge"></div>
+</body>
+</html>

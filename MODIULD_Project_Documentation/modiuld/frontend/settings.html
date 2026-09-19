@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Color Settings — MODIULD</title>
+  <link rel="icon" href="/frontend/assets/icon1.png">
+  <link rel="stylesheet" href="/frontend/css/style.css?v=3">
+  <script src="/frontend/js/theme.js?v=3" defer></script>
+  <script src="/frontend/js/auth.js?v=3" defer></script>
+  <script src="/frontend/js/version.js?v=3" defer></script>
+  <script src="/frontend/js/lang.js?v=3" defer></script>
+  <style>
+    .settings-container {
+      min-height: calc(100vh - 64px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      background: var(--bg-color, #0d0b1e);
+    }
+    .settings-card {
+      background: var(--card-bg);
+      border: 1.5px solid var(--border-card);
+      border-radius: var(--radius-xl);
+      padding: 40px 36px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-glow);
+    }
+    .settings-title {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+    .settings-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+    }
+    .theme-options {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+    .theme-option {
+      position: relative;
+    }
+    .theme-option input[type="radio"] {
+      display: none;
+    }
+    .theme-option label {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      border: 1.5px solid var(--border-card);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      background: var(--input-bg);
+      color: var(--text-primary);
+    }
+    .theme-option input[type="radio"]:checked + label {
+      border-color: var(--accent-purple);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.2);
+      background: rgba(124,58,237,0.1);
+    }
+    .theme-option label:hover {
+      border-color: var(--accent-teal);
+    }
+    .theme-preview {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.3rem;
+    }
+    .preview-default { background: linear-gradient(135deg,#0d0b1e,#7c3aed); }
+    .preview-light   { background: linear-gradient(135deg,#f5f5f5,#e8e8e8); border: 1px solid #ccc; }
+    .preview-dark    { background: linear-gradient(135deg,#0a0a0a,#1a1a1a); }
+    .theme-info { flex: 1; }
+    .theme-name {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+    .theme-desc {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+    .check-icon {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      border: 2px solid var(--border-card);
+      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.2s;
+    }
+    .theme-option input[type="radio"]:checked + label .check-icon {
+      background: var(--accent-purple);
+      border-color: var(--accent-purple);
+    }
+    .check-icon::after {
+      content: '';
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #fff;
+      display: none;
+    }
+    .theme-option input[type="radio"]:checked + label .check-icon::after {
+      display: block;
+    }
+    .btn-save {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: var(--radius-md);
+      background: var(--btn-primary);
+      color: #fff;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.1s;
+      letter-spacing: 0.02em;
+    }
+    .btn-save:hover { opacity: 0.88; transform: translateY(-1px); }
+    .btn-save:active { transform: translateY(0); }
+    .save-feedback {
+      text-align: center;
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: var(--accent-teal);
+      min-height: 20px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .save-feedback.show { opacity: 1; }
+    /* navbar text adapts */
+    .theme-light .navbar { border-bottom: 1px solid #ddd; }
+    .theme-light .navbar-nav a { color: #111; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-logo">
+      <img src="/frontend/assets/icon1.png" alt="MODIULD">
+    </div>
+    <ul class="navbar-nav">
+      <li><a href="/dashboard.html" data-i18n="btn_back_dashboard">← Dashboard</a></li>
+      <li><a href="#" id="btn-logout-nav" data-i18n="logout" style="color:var(--text-muted)">Logout</a></li>
+    </ul>
+  </nav>
+
+  <div class="settings-container">
+    <div class="settings-card">
+      <h1 class="settings-title" data-i18n="settings_title">Color Settings</h1>
+      <p class="settings-subtitle">
+        <span data-i18n="settings_subtitle">เลือกโหมดสีของเว็บแอป — ใช้งานได้ทีละโหมด</span><br>
+        <small data-i18n="settings_note">* ไม่กระทบหน้าแรก, Login และ Register</small>
+      </p>
+
+      <div class="theme-options">
+        <!-- Default -->
+        <div class="theme-option">
+          <input type="radio" name="theme" id="opt-default" value="default">
+          <label for="opt-default">
+            <div class="theme-preview preview-default"></div>
+            <div class="theme-info">
+              <div class="theme-name">Default (Color Mode)</div>
+              <div class="theme-desc" data-i18n="desc_default">พื้นหลังสีม่วง‑น้ำเงินเข้ม ตัวอักษรสีขาว (ค่าเริ่มต้น)</div>
+            </div>
+            <div class="check-icon"></div>
+          </label>
+        </div>
+
+        <!-- Light -->
+        <div class="theme-option">
+          <input type="radio" name="theme" id="opt-light" value="light">
+          <label for="opt-light">
+            <div class="theme-preview preview-light"></div>
+            <div class="theme-info">
+              <div class="theme-name">Light Mode</div>
+              <div class="theme-desc" data-i18n="desc_light">พื้นหลังสีขาว‑เทาอ่อน ตัวอักษรสีดำ</div>
+            </div>
+            <div class="check-icon"></div>
+          </label>
+        </div>
+
+        <!-- Dark -->
+        <div class="theme-option">
+          <input type="radio" name="theme" id="opt-dark" value="dark">
+          <label for="opt-dark">
+            <div class="theme-preview preview-dark"></div>
+            <div class="theme-info">
+              <div class="theme-name">Dark Mode</div>
+              <div class="theme-desc" data-i18n="desc_dark">พื้นหลังสีดำ‑เทาเข้ม ตัวอักษรสีขาว</div>
+            </div>
+            <div class="check-icon"></div>
+          </label>
+        </div>
+      </div>
+
+      <button class="btn-save" id="btn-save" data-i18n="btn_save">บันทึกการตั้งค่า</button>
+      <p class="save-feedback" id="save-feedback" data-i18n="save_feedback">บันทึกแล้ว! ธีมถูกเปลี่ยนแล้ว</p>
+    </div>
+  </div>
+
+  <div id="version-badge" class="version-badge"></div>
+
+  <script>
+  (function () {
+    // Load saved theme and check the right radio
+    const saved = localStorage.getItem('modiuld_theme') || 'default';
+    const radio = document.getElementById('opt-' + saved);
+    if (radio) radio.checked = true;
+
+    // Apply theme class IMMEDIATELY (before page paint) based on selection
+    function applyTheme(name) {
+      const html = document.documentElement;
+      html.classList.remove('theme-default', 'theme-light', 'theme-dark');
+      html.classList.add('theme-' + name);
+      html.setAttribute('data-theme', name);
+    }
+
+    // Live preview when radio changes
+    document.querySelectorAll('input[name="theme"]').forEach(r => {
+      r.addEventListener('change', () => applyTheme(r.value));
+    });
+
+    // Save on button click
+    document.getElementById('btn-save').addEventListener('click', () => {
+      const selected = document.querySelector('input[name="theme"]:checked');
+      if (!selected) return;
+      localStorage.setItem('modiuld_theme', selected.value);
+      applyTheme(selected.value);
+      const fb = document.getElementById('save-feedback');
+      fb.classList.add('show');
+      setTimeout(() => fb.classList.remove('show'), 2500);
+    });
+
+    // Logout
+    document.getElementById('btn-logout-nav').addEventListener('click', () => {
+      if (typeof Auth !== 'undefined') Auth.logout();
+      else { localStorage.removeItem('token'); localStorage.removeItem('user'); window.location.href = '/login.html'; }
+    });
+  })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Queueing — MODIULD</title>
+<link rel="icon" href="/frontend/assets/icon1.png">
+<link rel="stylesheet" href="/frontend/css/style.css?v=3">
+<script src="/frontend/js/theme.js?v=3" defer></script>
+<script src="/frontend/js/auth.js?v=3" defer></script>
+<script src="/frontend/js/version.js?v=3" defer></script>
+
+</head>
+<body class="module-body">
+<div class="module-page">
+  <div class="module-header">
+    <button class="btn-back" onclick="history.back()">&#8592; Back to Workspace</button>
+    <h1 class="module-page-title">Queueing</h1>
+  </div>
+  <div class="module-layout">
+    <div class="module-col" style="flex:1">
+      <h3 style="margin-bottom:16px">Add to Queue</h3>
+      <form onsubmit="addQueue(event)">
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Person Name</label>
+          <input type="text" id="q-name" class="form-control" required placeholder="e.g. John Doe">
+        </div>
+        <button type="submit" class="btn-primary">Add Person</button>
+      </form>
+      <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:24px 0">
+      <button class="btn-primary" onclick="nextQueue()" style="background:rgba(16,185,129,0.8)">Call Next</button>
+    </div>
+    
+    <div class="module-col" style="flex:2">
+      <h3 style="margin-bottom:16px">Currently Calling</h3>
+      <div class="queue-box">
+        <div class="queue-number" id="current-q">--</div>
+        <div class="queue-name" id="current-name">Waiting...</div>
+      </div>
+      <h3 style="margin-top:32px;margin-bottom:16px">Waiting List</h3>
+      <table class="data-table" id="table-q">
+        <thead><tr><th>Q#</th><th>Name</th><th>Status</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+let queue = [];
+let nextNum = 1;
+
+function render() {
+  const tbody = document.querySelector('#table-q tbody');
+  const waiting = queue.filter(q => q.status === 'waiting');
+  if(!waiting.length) { tbody.innerHTML = '<tr><td colspan="3" style="text-align:center">Empty queue.</td></tr>'; return; }
+  tbody.innerHTML = waiting.map(q => `<tr>
+    <td style="font-weight:600;font-size:1.1rem">A${String(q.num).padStart(3,'0')}</td>
+    <td>${q.name}</td>
+    <td><span class="badge badge-yellow">${q.status}</span></td>
+  </tr>`).join('');
+}
+function addQueue(e) {
+  e.preventDefault();
+  queue.push({ num: nextNum++, name: document.getElementById('q-name').value, status: 'waiting' });
+  e.target.reset(); render();
+}
+function nextQueue() {
+  const next = queue.find(q => q.status === 'waiting');
+  if(next) {
+    next.status = 'called';
+    document.getElementById('current-q').textContent = 'A' + String(next.num).padStart(3,'0');
+    document.getElementById('current-name').textContent = next.name;
+    render();
+  }
+}
+render();
+</script>
+<div id="version-badge" class="version-badge"></div>
+</body>
+</html>
+
+

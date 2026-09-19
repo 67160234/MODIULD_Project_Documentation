@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sign In — MODIULD</title>
+<meta name="description" content="Sign in to your MODIULD account.">
+<link rel="icon" href="/frontend/assets/icon1.png">
+<link rel="stylesheet" href="/frontend/css/style.css?v=3">
+<script src="/frontend/js/auth.js?v=3" defer></script>
+<script src="/frontend/js/version.js?v=3" defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body class="auth-body">
+<nav class="navbar">
+  <div class="navbar-logo"><img src="/frontend/assets/icon1.png" alt="MODIULD"></div>
+  <ul class="navbar-nav">
+    <li><a href="/login.html">Sign in</a></li>
+    <li><a href="/register.html">Register</a></li>
+  </ul>
+</nav>
+<div class="auth-container">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img src="/frontend/assets/Moduild_logo.png" alt="MODIULD">
+    </div>
+    <div id="login-alert" class="alert hidden"></div>
+    <form id="login-form" novalidate>
+      <div class="form-group">
+        <input type="text" id="login-email" class="form-control" placeholder="อีเมล หรือ Username" autocomplete="username" required>
+      </div>
+      <div class="form-group">
+        <input type="password" id="login-password" class="form-control" placeholder="รหัสผ่าน" autocomplete="current-password" required>
+        <span class="password-toggle" onclick="togglePass('login-password', this)">SHOW</span>
+      </div>
+      <div id="google-button" style="display:flex;justify-content:center;margin:14px 0"></div>
+      <div id="google-username-section" class="hidden">
+        <div class="form-group"><input type="text" id="google-username" class="form-control" placeholder="Username (3-20: letters, numbers, _)" autocomplete="username"></div>
+        <button type="button" class="btn-primary" id="btn-google-complete">Continue</button>
+      </div>
+      <button type="submit" class="btn-primary" id="btn-login">Sign in</button>
+    </form>
+    <div class="auth-links">
+      <a href="/register.html" id="link-register">Register</a>
+      <a href="#" id="link-forgot">Forget Password</a>
+    </div>
+  </div>
+</div>
+<script>
+function togglePass(id, btn) {
+  const el = document.getElementById(id);
+  if(el.type === 'password') { el.type = 'text'; btn.textContent = 'HIDE'; }
+  else { el.type = 'password'; btn.textContent = 'SHOW'; }
+}
+document.addEventListener('DOMContentLoaded', () => {
+  Auth.redirectIfLoggedIn();
+  document.getElementById('login-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const alert = document.getElementById('login-alert');
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-password').value;
+    const btn   = document.getElementById('btn-login');
+    btn.disabled = true; btn.textContent = 'Signing in...';
+    const r = await Auth.login(email, pass);
+    btn.disabled = false; btn.textContent = 'Sign in';
+    if (r.ok) { window.location.href = '/dashboard.html'; }
+    else { showAlert(alert, r.data.error || 'Login failed.'); }
+  });
+  let googleSignupToken = null;
+  const googleResult = (r) => {
+    const alert = document.getElementById('login-alert');
+    if (r.ok && r.data?.token) { window.location.href = '/dashboard.html'; return; }
+    if (r.ok && r.data?.needs_username) {
+      googleSignupToken = r.data.signup_token;
+      document.getElementById('google-username-section').classList.remove('hidden');
+      document.getElementById('google-button').classList.add('hidden');
+      document.querySelectorAll('#login-form > .form-group').forEach((el) => el.classList.add('hidden'));
+      document.getElementById('btn-login').classList.add('hidden');
+      showAlert(alert, 'ใช้ ' + r.data.email + ' แล้ว กรุณาตั้ง Username เพื่อดำเนินการต่อ', 'success'); return;
+    }
+    showAlert(alert, r.data?.error || r.error || 'Google Sign-In failed.');
+  };
+  Auth.initGoogle('google-button', googleResult);
+  document.getElementById('btn-google-complete').addEventListener('click', async () => {
+    const btn = document.getElementById('btn-google-complete'); btn.disabled = true;
+    const r = await Auth.completeGoogleSignup(googleSignupToken, document.getElementById('google-username').value.trim());
+    btn.disabled = false; googleResult(r);
+  });
+});
+</script>
+<div id="version-badge" class="version-badge"></div>
+</body>
+</html>

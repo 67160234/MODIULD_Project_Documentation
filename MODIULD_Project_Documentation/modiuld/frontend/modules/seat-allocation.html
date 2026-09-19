@@ -1,0 +1,85 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Seat Allocation — MODIULD</title>
+<link rel="icon" href="/frontend/assets/icon1.png">
+<link rel="stylesheet" href="/frontend/css/style.css?v=3">
+<script src="/frontend/js/theme.js?v=3" defer></script>
+<script src="/frontend/js/auth.js?v=3" defer></script>
+<script src="/frontend/js/version.js?v=3" defer></script>
+
+</head>
+<body class="module-body">
+<div class="module-page">
+  <div class="module-header">
+    <button class="btn-back" onclick="history.back()">&#8592; Back to Workspace</button>
+    <h1 class="module-page-title">Seat Allocation</h1>
+  </div>
+  <div id="alert-area" class="alert hidden"></div>
+  <div class="module-layout">
+    <div class="module-col" style="flex:2">
+      <h3 style="margin-bottom:16px">Floor Map</h3>
+      <div class="seat-grid" id="seat-grid"></div>
+    </div>
+    <div class="module-col" style="flex:1">
+      <h3 style="margin-bottom:16px">Assign Seat</h3>
+      <form id="seat-form" onsubmit="assignSeat(event)">
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Selected Seat</label>
+          <input type="text" id="s-label" class="form-control" readonly placeholder="Click a seat">
+        </div>
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Assign To</label>
+          <input type="text" id="s-person" class="form-control" required placeholder="Name">
+        </div>
+        <button type="submit" class="btn-primary" id="btn-assign" disabled>Assign</button>
+        <button type="button" class="btn-reset" id="btn-clear" onclick="clearSeat()" style="width:100%; margin-top:8px; display:none;">Clear Seat</button>
+      </form>
+    </div>
+  </div>
+</div>
+<script>
+let seats = [];
+for (let i=1; i<=12; i++) {
+  seats.push({ id: 'S' + String(i).padStart(2,'0'), status: i%3===0?'occupied':'available', person: i%3===0?'John Doe':'' });
+}
+let selectedSeat = null;
+
+function render() {
+  const grid = document.getElementById('seat-grid');
+  grid.innerHTML = seats.map(s => `
+    <div class="seat ${s.status}" onclick="selectSeat('${s.id}')">
+      <div>${s.id}</div>
+      <div style="font-size:0.7rem;font-weight:400;margin-top:4px">${s.person || 'Available'}</div>
+    </div>
+  `).join('');
+}
+function selectSeat(id) {
+  selectedSeat = seats.find(s => s.id === id);
+  document.getElementById('s-label').value = selectedSeat.id;
+  document.getElementById('s-person').value = selectedSeat.person;
+  document.getElementById('btn-assign').disabled = false;
+  document.getElementById('btn-clear').style.display = selectedSeat.status === 'occupied' ? 'block' : 'none';
+}
+function assignSeat(e) {
+  e.preventDefault();
+  if(!selectedSeat) return;
+  selectedSeat.person = document.getElementById('s-person').value;
+  selectedSeat.status = 'occupied';
+  render(); selectSeat(selectedSeat.id);
+  const alert = document.getElementById('alert-area');
+  alert.textContent = 'Seat assigned.'; alert.className = 'alert alert-success'; alert.classList.remove('hidden');
+}
+function clearSeat() {
+  if(!selectedSeat) return;
+  selectedSeat.person = ''; selectedSeat.status = 'available';
+  render(); selectSeat(selectedSeat.id);
+}
+render();
+</script>
+<div id="version-badge" class="version-badge"></div>
+</body>
+</html>
+
+

@@ -1,0 +1,82 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="theme-default" data-theme="default">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profile Management — MODIULD</title>
+<link rel="icon" href="/frontend/assets/icon1.png">
+<link rel="stylesheet" href="/frontend/css/style.css?v=3">
+<script src="/frontend/js/theme.js?v=3" defer></script>
+<script src="/frontend/js/auth.js?v=3" defer></script>
+<script src="/frontend/js/version.js?v=3" defer></script>
+
+</head>
+<body class="module-body">
+<div class="module-page">
+  <div class="module-header">
+    <button class="btn-back" onclick="history.back()">&#8592; Back to Workspace</button>
+    <h1 class="module-page-title">Profile Management</h1>
+  </div>
+  <div id="alert-area" class="alert hidden"></div>
+  <div class="module-layout">
+    <div class="module-col">
+      <h3 style="margin-bottom:16px">My Profile</h3>
+      <div style="display:flex;align-items:center;gap:20px;margin-bottom:24px">
+        <div class="avatar" style="width:80px;height:80px"><svg viewBox="0 0 24 24" width="40" height="40"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg></div>
+        <div>
+          <h2 id="disp-name" style="margin-bottom:4px">Loading...</h2>
+          <span class="badge badge-purple" id="disp-role">User</span>
+        </div>
+      </div>
+      <form onsubmit="saveProfile(event)">
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Display Name</label>
+          <input type="text" id="p-name" class="form-control" required>
+        </div>
+        <div class="form-group">
+          <label style="display:block;margin-bottom:4px;font-size:.9rem;color:var(--text-muted)">Email (Read only)</label>
+          <input type="email" id="p-email" class="form-control" readonly style="opacity:0.6">
+        </div>
+        <button type="submit" class="btn-primary">Save Profile</button>
+      </form>
+    </div>
+    <div class="module-col">
+      <h3 style="margin-bottom:16px">Team Directory</h3>
+      <table class="data-table" id="table-team">
+        <thead><tr><th>Name</th><th>Role</th></tr></thead>
+        <tbody>
+          <tr><td>Jane Smith</td><td><span class="badge badge-blue">Manager</span></td></tr>
+          <tr><td>Mark Johnson</td><td><span class="badge badge-green">Staff</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const user = Auth.getUser();
+  if(user) {
+    document.getElementById('disp-name').textContent = user.display_name;
+    document.getElementById('p-name').value = user.display_name;
+    document.getElementById('p-email').value = user.email;
+  } else {
+    document.getElementById('disp-name').textContent = 'Guest User';
+    document.getElementById('p-name').value = 'Guest';
+    document.getElementById('p-email').value = 'guest@modiuld.local';
+  }
+});
+function saveProfile(e) {
+  e.preventDefault();
+  const name = document.getElementById('p-name').value;
+  document.getElementById('disp-name').textContent = name;
+  const alert = document.getElementById('alert-area');
+  alert.textContent = 'Profile updated successfully!';
+  alert.className = 'alert alert-success';
+  alert.classList.remove('hidden');
+  setTimeout(()=>alert.classList.add('hidden'),3000);
+}
+</script>
+<div id="version-badge" class="version-badge"></div>
+</body>
+</html>
+
+
